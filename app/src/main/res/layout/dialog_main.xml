@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/ChocolateTransparent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/etSubreddit"
+        android:layout_width="match_parent"
+        android:layout_margin="30dp"
+        android:maxLength="40"
+        android:hint="@string/hintSubreddit"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/etRatio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numeric="decimal"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginLeft="30dp"
+        android:hint="@string/hintRatio" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="30dp"
+        android:weightSum="1"
+        android:paddingBottom="30dp"
+        android:layout_marginLeft="30dp">
+        <Button
+            android:id="@+id/bCancel"
+            android:layout_weight="0.5"
+            android:layout_marginRight="5dp"
+            android:text="@string/cancel"
+            android:background="@color/Chocolate"
+            android:layout_width="0dp"
+            android:textSize="14sp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/bSave"
+            android:layout_marginLeft="5dp"
+            android:text="@string/changeSetting"
+            android:background="@color/Chocolate"
+            android:layout_width="0dp"
+            android:textSize="14sp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+</LinearLayout>

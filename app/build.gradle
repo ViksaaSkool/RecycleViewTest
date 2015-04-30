@@ -1,0 +1,61 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "com.recycleview.tests.activity"
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+
+repositories {
+    maven {
+        url "http://repo.magnet.com:8081/artifactory/public/"
+    }
+    maven {
+        url "https://jitpack.io"
+    }
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    /* Support libs */
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.3'
+    compile 'com.android.support:support-v4:21.0.3'
+
+    /* ButterKnife */
+    compile 'com.jakewharton:butterknife:6.1.0'
+
+    /* UI related */
+    compile 'com.afollestad:material-dialogs:0.6.6.2'
+    compile 'com.github.johnpersano:supertoasts:1.3.4@aar'
+    compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.1.3'
+
+    /* Picasso (Image loading lib)*/
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+    /* Snappydb (cache/db) */
+    compile 'com.snappydb:snappydb-lib:0.5.0'
+
+    /* Magnet */
+    compile("com.magnet:r2m-sdk-android:1.1.0@aar") {
+        transitive = true
+    }
+}
+

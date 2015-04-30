@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="Chocolate">#D2691E</color>
+    <color name="ChocolateDark">#A85418</color>
+    <color name="ChocolateTransparent">#8CD2691E</color>
+    <color name="Black">#000000</color>
+    <color name="White">#FFFFFF</color>
+
+
+</resources>

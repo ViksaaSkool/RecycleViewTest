@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">RecycleViewTest</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="testText">Test Text</string>
+    <string name="pleaseWait">Please wait</string>
+    <string name="loading">Loading&#8230;&#8230;&#8230;</string>
+    <string name="title">RecycleView | Reddit content </string>
+    <string name="smtWW">Something went wrong :(</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="changeSetting">Change settings</string>
+
+    <string name="hintSubreddit">Enter valid subreddit!</string>
+    <string name="hintRatio">Enter ratio (0.0 - 10.0)</string>
+    <string name="notValid">Ratio not valid</string>
+    <string name="nothingToShow">Nothing to see here :(</string>
+
+</resources>
