@@ -24,6 +24,7 @@ import com.recycleview.tests.rest.RestAPI;
 import com.recycleview.tests.utils.LogUtil;
 import com.recycleview.tests.utils.Static;
 import com.recycleview.tests.utils.UIUtil;
+import com.recycleview.tests.utils.ValidationUtil;
 import com.snappydb.SnappydbException;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private ArrayList<SubRedditItem> mItems;
 
     private String after, subreddit;
-    private int visibleItemCount, totalItemCount, pastVisiblesItems;
+    private int visibleItemCount, totalItemCount, pastVisiblesItems, lastVisivleItem;
     private MainActivity mActivity;
     private SubRedditResult mSubredditResult;
 
@@ -79,6 +80,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             mLinearLayoutManager = new LinearLayoutManager(getActivity());
             mRvPosts.setLayoutManager(mLinearLayoutManager);
             mSwipeRefreshLayout.setOnRefreshListener(this);
+            lastVisivleItem = 0;
+            totalItemCount = 0;
+            setEndlessScroll();
         }
 
 
@@ -93,7 +97,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (mActivity == null && getActivity() != null) {
             mActivity = (MainActivity) getActivity();
         } else {
-            loadFeed();
+            loadFeed(Static.LOAD);
         }
 
     }
@@ -101,7 +105,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onRefresh() {
-
+        if (!mActivity.getLoading().isShowing() &&
+                mSwipeRefreshLayout != null && !mSwipeRefreshLayout.isRefreshing())
+            loadFeed(Static.REFRESH);
     }
 
 
@@ -121,10 +127,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         visibleItemCount = mLinearLayoutManager.getChildCount();
                         totalItemCount = mLinearLayoutManager.getItemCount();
                         pastVisiblesItems = mLinearLayoutManager.findFirstVisibleItemPosition();
+                        lastVisivleItem = mLinearLayoutManager.findLastVisibleItemPosition();
 
 
-                        if (!mActivity.getLoading().isShowing()) {
-
+                        if (!mActivity.getLoading().isShowing() && lastVisivleItem == totalItemCount - 1) {
+                            loadFeed(Static.LOAD_MORE);
                         }
 
                     }
@@ -133,7 +140,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             });
     }
 
-    public void loadFeed() {
+    public void loadFeed(final int flag) {
         if (mActivity.getLoading() != null && !mActivity.getLoading().isShowing()) {
 
             mActivity.getLoading().show();
@@ -142,17 +149,36 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 @Override
                 public void onSuccess(Call<?> call) throws Throwable {
                     super.onSuccess(call);
+                    SubRedditResult result = new SubRedditResult();
+
                     if (call != null) {
-                        mSubredditResult = new SubRedditResult();
-                        mSubredditResult = ((Call<SubRedditResult>) call).get();
-                        if (mSubredditResult != null)
-                            setAdapterAndData(mSubredditResult);
-                        else
-                            UIUtil.showSuperToast(mActivity, R.string.smtWW, SuperToast.Duration.MEDIUM);
+                        if (mSubredditResult == null)
+                            mSubredditResult = new SubRedditResult();
+                        result = ((Call<SubRedditResult>) call).get();
+
+                        if (ValidationUtil.valResObj(result)) {
+
+                            if (flag == Static.LOAD_MORE && ValidationUtil.valResObj(mSubredditResult))
+                                mSubredditResult.getData().getChildren().addAll(result.getData().getChildren());
+
+                            else if ((flag == Static.REFRESH
+                                    && ValidationUtil.valResObjRef(mSubredditResult)
+                                    && ValidationUtil.valResObjRef(result)) || flag == Static.LOAD)
+                                mSubredditResult = result;
+
+
+                            if (mSubredditResult != null)
+                                setAdapterAndData(mSubredditResult);
+                            else
+                                UIUtil.showSuperToast(mActivity, R.string.smtWWInt, SuperToast.Duration.MEDIUM);
+                        } else
+                            UIUtil.showSuperToast(mActivity, R.string.smtWWInt, SuperToast.Duration.MEDIUM);
                     }
                     if (mActivity.getLoading() != null && mActivity.getLoading().isShowing())
                         mActivity.getLoading().dismiss();
 
+                    if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing())
+                        mSwipeRefreshLayout.setRefreshing(false);
 
                 }
 
@@ -165,6 +191,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                     if (mActivity.getLoading() != null && mActivity.getLoading().isShowing())
                         mActivity.getLoading().dismiss();
+                    if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing())
+                        mSwipeRefreshLayout.setRefreshing(false);
                 }
             });
 
@@ -229,13 +257,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             }
                         })
                 );
-
-
             }
-
-
         }
-
     }
+
 
 }

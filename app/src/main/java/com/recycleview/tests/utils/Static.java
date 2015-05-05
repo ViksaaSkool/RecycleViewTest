@@ -29,4 +29,10 @@ public class Static {
     public static final double PIC_RATIO_VALUE = 3.0;
     public static final int ITEMS_VALUE = 50;
     public static final String SUBREDDIT_VALUE = "earthporn";
+
+
+    //loading flags
+    public static final int LOAD = 0;
+    public static final int REFRESH = 1;
+    public static final int LOAD_MORE = 2;
 }
