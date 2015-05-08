@@ -6,7 +6,7 @@
 
     <string name="testText">Test Text</string>
     <string name="pleaseWait">Please wait</string>
-    <string name="loading">Loading&#8230;&#8230;&#8230;</string>
+    <string name="loading">Loading&#8230;</string>
     <string name="title">RecycleView | Reddit content </string>
     <string name="smtWW">Something went wrong :(</string>
     <string name="smtWWInt">Check Internet connection. Something went wrong :(</string>

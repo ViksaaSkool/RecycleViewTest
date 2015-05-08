@@ -10,6 +10,7 @@ public class Static {
     public static final String HEIGHT_TAG = "HGH";
     public static final String DB_TAG = "SDB";
     public static final String MAGNET_TAG = "MREST";
+    public static final String AFTER_TAG = "AFTR";
 
     //DB keys
     public static final String PIC_RATIO = "picRatio";

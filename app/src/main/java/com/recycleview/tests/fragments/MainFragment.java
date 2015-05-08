@@ -49,7 +49,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private ArrayList<SubRedditItem> mItems;
 
     private String after, subreddit;
-    private int visibleItemCount, totalItemCount, pastVisiblesItems, lastVisivleItem;
+    private int totalItemCount, lastVisivleItem;
     private MainActivity mActivity;
     private SubRedditResult mSubredditResult;
 
@@ -82,6 +82,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             mSwipeRefreshLayout.setOnRefreshListener(this);
             lastVisivleItem = 0;
             totalItemCount = 0;
+            after = "";
+            //make sure it loads fresh news
+            try {
+                if (mActivity.getDB().exists(Static.FEED_AFTER))
+                     mActivity.getDB().del(Static.FEED_AFTER);
+            } catch (SnappydbException e) {
+                e.printStackTrace();
+            }
             setEndlessScroll();
         }
 
@@ -96,7 +104,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (mActivity == null && getActivity() != null) {
             mActivity = (MainActivity) getActivity();
-        } else {
+        } else if (mSubredditResult == null){
             loadFeed(Static.LOAD);
         }
 
@@ -105,9 +113,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onRefresh() {
-        if (!mActivity.getLoading().isShowing() &&
-                mSwipeRefreshLayout != null && !mSwipeRefreshLayout.isRefreshing())
+        if (!mActivity.getLoading().isShowing() && mSwipeRefreshLayout != null){
+
             loadFeed(Static.REFRESH);
+        }
+
     }
 
 
@@ -124,9 +134,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                     if (mLinearLayoutManager != null) {
-                        visibleItemCount = mLinearLayoutManager.getChildCount();
                         totalItemCount = mLinearLayoutManager.getItemCount();
-                        pastVisiblesItems = mLinearLayoutManager.findFirstVisibleItemPosition();
                         lastVisivleItem = mLinearLayoutManager.findLastVisibleItemPosition();
 
 
@@ -143,8 +151,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void loadFeed(final int flag) {
         if (mActivity.getLoading() != null && !mActivity.getLoading().isShowing()) {
 
-            mActivity.getLoading().show();
-            setFeedParams();
+            if (flag != Static.REFRESH)
+                mActivity.getLoading().show();
+            setFeedParams(flag);
+            LogUtil.dLog(Static.AFTER_TAG, "after value =  " + after);
             RestAPI.getRedditAPI(mActivity).getSubReddit(subreddit, Integer.toString(Static.ITEMS_VALUE), after, new StateChangedHandler(mActivity) {
                 @Override
                 public void onSuccess(Call<?> call) throws Throwable {
@@ -158,18 +168,30 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                         if (ValidationUtil.valResObj(result)) {
 
-                            if (flag == Static.LOAD_MORE && ValidationUtil.valResObj(mSubredditResult))
-                                mSubredditResult.getData().getChildren().addAll(result.getData().getChildren());
+                            if (flag == Static.LOAD_MORE && ValidationUtil.valResObj(mSubredditResult)) {
 
-                            else if ((flag == Static.REFRESH
+                                if (mActivity.getDB() != null && mActivity.getDB().isOpen())
+                                    mActivity.getDB().put(Static.FEED_AFTER, result.getData().getAfter());
+                                mSubredditResult.getData().getChildren().addAll(result.getData().getChildren());
+                                setAdapterAndData(mSubredditResult);
+                            } else if ((flag == Static.REFRESH
                                     && ValidationUtil.valResObjRef(mSubredditResult)
-                                    && ValidationUtil.valResObjRef(result)) || flag == Static.LOAD)
+                                    && ValidationUtil.valResObjRef(result)) || flag == Static.LOAD) {
+
+                                LogUtil.dLog(Static.AFTER_TAG, "result.getData().getAfter() =  " + result.getData().getAfter());
+                                if (mActivity.getDB() != null && mActivity.getDB().isOpen())
+                                    mActivity.getDB().put(Static.FEED_AFTER, result.getData().getAfter());
+
                                 mSubredditResult = result;
 
+                                lastVisivleItem = 0;
+                                mSubredditResult = result;
+                            }
 
-                            if (mSubredditResult != null)
+
+                            if (mSubredditResult != null && flag != Static.LOAD_MORE)
                                 setAdapterAndData(mSubredditResult);
-                            else
+                            else if (mSubredditResult == null)
                                 UIUtil.showSuperToast(mActivity, R.string.smtWWInt, SuperToast.Duration.MEDIUM);
                         } else
                             UIUtil.showSuperToast(mActivity, R.string.smtWWInt, SuperToast.Duration.MEDIUM);
@@ -202,7 +224,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
 
-    public void setFeedParams() {
+    public void setFeedParams(int flag) {
         try {
             if (mActivity.getDB() != null && mActivity.getDB().isOpen()) {
                 //check if new subreddit is entered
@@ -212,7 +234,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     subreddit = Static.SUBREDDIT_VALUE;
 
                 //check if new data needs to be loaded; null - start
-                if (mActivity.getDB().exists(Static.FEED_AFTER))
+                if (flag == Static.REFRESH)
+                    after = "";
+                else if (mActivity.getDB().exists(Static.FEED_AFTER))
                     after = mActivity.getDB().get(Static.FEED_AFTER);
                 else
                     after = "";
@@ -257,6 +281,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             }
                         })
                 );
+
+                mRvPosts.scrollToPosition(lastVisivleItem);
             }
         }
     }
